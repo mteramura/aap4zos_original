@@ -1,0 +1,25 @@
+- name: Extract SYSIN input from RACFCERT JCL.
+  hosts: zos_host
+  gather_facts: false
+  environment: "{{ environment_vars }}"
+  tasks:
+
+    - name: Fetch JCL from target PDS
+      ibm.ibm_zos_core.zos_fetch:
+        src: "IBMUSER.JCL(RACFCERT)"  
+        dest: "./fetched_racfcert_jcl.txt"
+        is_binary: false
+      
+    - name: Slurp the fetched JCL into memory
+      ansible.builtin.slurp:
+        src: "./fetched_racfcert_jcl.txt"
+      register: jcl_content
+
+    - name: Extract and print SYSTSIN block
+      ansible.builtin.debug:
+        msg:
+          - "SYSTSIN Input: {{ systsin_input }}"
+
+    - name: Print out all gathered facts about the z/OS host.
+      ansible.builtin.debug:
+        var: ansible_facts
